@@ -127,7 +127,7 @@ exports.Prisma.OrderScalarFieldEnum = {
   status: 'status',
   paid: 'paid',
   paidAt: 'paidAt',
-  createdAd: 'createdAd',
+  createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 

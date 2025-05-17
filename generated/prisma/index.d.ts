@@ -916,7 +916,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus | null
     paid: boolean | null
     paidAt: Date | null
-    createdAd: Date | null
+    createdAt: Date | null
     updatedAt: Date | null
   }
 
@@ -927,7 +927,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus | null
     paid: boolean | null
     paidAt: Date | null
-    createdAd: Date | null
+    createdAt: Date | null
     updatedAt: Date | null
   }
 
@@ -938,7 +938,7 @@ export namespace Prisma {
     status: number
     paid: number
     paidAt: number
-    createdAd: number
+    createdAt: number
     updatedAt: number
     _all: number
   }
@@ -961,7 +961,7 @@ export namespace Prisma {
     status?: true
     paid?: true
     paidAt?: true
-    createdAd?: true
+    createdAt?: true
     updatedAt?: true
   }
 
@@ -972,7 +972,7 @@ export namespace Prisma {
     status?: true
     paid?: true
     paidAt?: true
-    createdAd?: true
+    createdAt?: true
     updatedAt?: true
   }
 
@@ -983,7 +983,7 @@ export namespace Prisma {
     status?: true
     paid?: true
     paidAt?: true
-    createdAd?: true
+    createdAt?: true
     updatedAt?: true
     _all?: true
   }
@@ -1081,7 +1081,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus
     paid: boolean
     paidAt: Date | null
-    createdAd: Date
+    createdAt: Date
     updatedAt: Date
     _count: OrderCountAggregateOutputType | null
     _avg: OrderAvgAggregateOutputType | null
@@ -1111,7 +1111,7 @@ export namespace Prisma {
     status?: boolean
     paid?: boolean
     paidAt?: boolean
-    createdAd?: boolean
+    createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["order"]>
 
@@ -1122,7 +1122,7 @@ export namespace Prisma {
     status?: boolean
     paid?: boolean
     paidAt?: boolean
-    createdAd?: boolean
+    createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["order"]>
 
@@ -1133,7 +1133,7 @@ export namespace Prisma {
     status?: boolean
     paid?: boolean
     paidAt?: boolean
-    createdAd?: boolean
+    createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["order"]>
 
@@ -1144,11 +1144,11 @@ export namespace Prisma {
     status?: boolean
     paid?: boolean
     paidAt?: boolean
-    createdAd?: boolean
+    createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "totalAmount" | "totalItems" | "status" | "paid" | "paidAt" | "createdAd" | "updatedAt", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "totalAmount" | "totalItems" | "status" | "paid" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 
   export type $OrderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Order"
@@ -1160,7 +1160,7 @@ export namespace Prisma {
       status: $Enums.OrderStatus
       paid: boolean
       paidAt: Date | null
-      createdAd: Date
+      createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["order"]>
     composites: {}
@@ -1591,7 +1591,7 @@ export namespace Prisma {
     readonly status: FieldRef<"Order", 'OrderStatus'>
     readonly paid: FieldRef<"Order", 'Boolean'>
     readonly paidAt: FieldRef<"Order", 'DateTime'>
-    readonly createdAd: FieldRef<"Order", 'DateTime'>
+    readonly createdAt: FieldRef<"Order", 'DateTime'>
     readonly updatedAt: FieldRef<"Order", 'DateTime'>
   }
     
@@ -1980,7 +1980,7 @@ export namespace Prisma {
     status: 'status',
     paid: 'paid',
     paidAt: 'paidAt',
-    createdAd: 'createdAd',
+    createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
@@ -2106,7 +2106,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
     paid?: BoolFilter<"Order"> | boolean
     paidAt?: DateTimeNullableFilter<"Order"> | Date | string | null
-    createdAd?: DateTimeFilter<"Order"> | Date | string
+    createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
   }
 
@@ -2117,7 +2117,7 @@ export namespace Prisma {
     status?: SortOrder
     paid?: SortOrder
     paidAt?: SortOrderInput | SortOrder
-    createdAd?: SortOrder
+    createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
@@ -2131,7 +2131,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
     paid?: BoolFilter<"Order"> | boolean
     paidAt?: DateTimeNullableFilter<"Order"> | Date | string | null
-    createdAd?: DateTimeFilter<"Order"> | Date | string
+    createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
   }, "id">
 
@@ -2142,7 +2142,7 @@ export namespace Prisma {
     status?: SortOrder
     paid?: SortOrder
     paidAt?: SortOrderInput | SortOrder
-    createdAd?: SortOrder
+    createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: OrderCountOrderByAggregateInput
     _avg?: OrderAvgOrderByAggregateInput
@@ -2161,7 +2161,7 @@ export namespace Prisma {
     status?: EnumOrderStatusWithAggregatesFilter<"Order"> | $Enums.OrderStatus
     paid?: BoolWithAggregatesFilter<"Order"> | boolean
     paidAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
-    createdAd?: DateTimeWithAggregatesFilter<"Order"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
   }
 
@@ -2172,7 +2172,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus
     paid?: boolean
     paidAt?: Date | string | null
-    createdAd?: Date | string
+    createdAt?: Date | string
     updatedAt?: Date | string
   }
 
@@ -2183,7 +2183,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus
     paid?: boolean
     paidAt?: Date | string | null
-    createdAd?: Date | string
+    createdAt?: Date | string
     updatedAt?: Date | string
   }
 
@@ -2194,7 +2194,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     paid?: BoolFieldUpdateOperationsInput | boolean
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAd?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2205,7 +2205,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     paid?: BoolFieldUpdateOperationsInput | boolean
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAd?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2216,7 +2216,7 @@ export namespace Prisma {
     status: $Enums.OrderStatus
     paid?: boolean
     paidAt?: Date | string | null
-    createdAd?: Date | string
+    createdAt?: Date | string
     updatedAt?: Date | string
   }
 
@@ -2227,7 +2227,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     paid?: BoolFieldUpdateOperationsInput | boolean
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAd?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2238,7 +2238,7 @@ export namespace Prisma {
     status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
     paid?: BoolFieldUpdateOperationsInput | boolean
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAd?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -2325,7 +2325,7 @@ export namespace Prisma {
     status?: SortOrder
     paid?: SortOrder
     paidAt?: SortOrder
-    createdAd?: SortOrder
+    createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
@@ -2341,7 +2341,7 @@ export namespace Prisma {
     status?: SortOrder
     paid?: SortOrder
     paidAt?: SortOrder
-    createdAd?: SortOrder
+    createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
@@ -2352,7 +2352,7 @@ export namespace Prisma {
     status?: SortOrder
     paid?: SortOrder
     paidAt?: SortOrder
-    createdAd?: SortOrder
+    createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 

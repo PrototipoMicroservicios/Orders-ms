@@ -26,6 +26,8 @@
     "@nestjs/microservices": "^11.1.0",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.7.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "controller": "^0.6.2",
     "dotenv": "^16.5.0",
     "joi": "^17.13.3",
