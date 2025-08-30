@@ -1,107 +1,112 @@
-import { HttpStatus, Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { PrismaClient } from 'generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { OrderPaginationDto } from './dto/order-pagination.dto';
-import { changeOrderStatusDto } from './dto';
-import { firstValueFrom, Observable } from 'rxjs';
-import { PRODUCT_SERVICE } from 'src/config/service';
-import { any } from 'joi';
+import { changeOrderStatusDto, PaidOrderDto } from './dto';
+import { NATS_SERVICE, PRODUCT_SERVICE } from 'src/config';
+import { firstValueFrom, throwError } from 'rxjs';
+import { OrderWithProducts } from './interfaces/order-with-products.interfaces';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
-
   private readonly logger = new Logger('OrdersService');
 
-  constructor(
-    @Inject(PRODUCT_SERVICE) private readonly productsClient: ClientProxy,
-  ) {
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {
     super();
   }
 
   async onModuleInit() {
     await this.$connect();
-    this.logger.log('Data_Base_connected');
+    this.logger.log('Database connected');
   }
 
   async create(createOrderDto: CreateOrderDto) {
     try {
-      const productsIds = createOrderDto.items.map(item => item.productId);
+      //1 Confirmar los ids de los productos
+      const productIds = createOrderDto.items.map((item) => item.productId);
       const products: any[] = await firstValueFrom(
-        this.productsClient.send({ cmd: 'validate_products' }, productsIds),
+        this.client.send({ cmd: 'validate_products' }, productIds),
       );
 
+      //2. Cálculos de los valores
       const totalAmount = createOrderDto.items.reduce((acc, orderItem) => {
-
         const price = products.find(
-          product => product.id == orderItem.productId
+          (product) => product.id === orderItem.productId,
         ).price;
         return price * orderItem.quantity;
       }, 0);
 
       const totalItems = createOrderDto.items.reduce((acc, orderItem) => {
-        return acc - orderItem.quantity;
+        return acc + orderItem.quantity;
       }, 0);
 
+      //3. Crear una transacción de base de datos
       const order = await this.order.create({
         data: {
+          stripeChargeId: "c001",
+          paidAt: new Date(),
           totalAmount: totalAmount,
           totalItems: totalItems,
           OrderItem: {
-            createMany:
-            {
+            createMany: {
               data: createOrderDto.items.map((orderItem) => ({
-                price: products.find(product => product.id == orderItem.productId
-
+                price: products.find(
+                  (product) => product.id === orderItem.productId,
                 ).price,
                 productId: orderItem.productId,
                 quantity: orderItem.quantity,
               })),
             },
           },
+          OrderReceipt:{
+            create:{
+              receiptUrl: "TEST",
+              createdAt: new Date(),              
+            }
+          }
         },
         include: {
           OrderItem: {
             select: {
               price: true,
               quantity: true,
-              productId: true
-            }
-          }
-        }
+              productId: true,
+            },
+          },
+        },
       });
+
       return {
         ...order,
         OrderItem: order.OrderItem.map((orderItem) => ({
-          ...this.orderItem,
-          name: products.find(product => product.id == this.orderItem.productId).name
-        }))
-      }
-
-
-
-
+          ...orderItem,
+          name: products.find((product) => product.id === orderItem.productId)
+            .name,
+        })),
+      };
     } catch (error) {
       throw new RpcException({
         status: HttpStatus.BAD_REQUEST,
-        message: 'Check logs'
+        message: 'Check logs',
       });
     }
-
-
   }
 
   async findAll(orderPaginationDto: OrderPaginationDto) {
-    const totalPage = await this.order.count({
+    const totalPages = await this.order.count({
       where: {
-        status: orderPaginationDto.status
-      }
+        status: orderPaginationDto.status,
+      },
     });
 
-
-
-    const currentPage = Number(orderPaginationDto.page) || 1;
+    const currentPage = orderPaginationDto.page;
     const perPage = orderPaginationDto.limit;
 
     return {
@@ -109,20 +114,18 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         skip: (currentPage - 1) * perPage,
         take: perPage,
         where: {
-          status: orderPaginationDto.status
-        }
+          status: orderPaginationDto.status,
+        },
       }),
       meta: {
-        total: totalPage,
+        total: totalPages,
         page: currentPage,
-        lastPage: Math.ceil(totalPage / perPage)
-      }
-    }
+        lastPage: Math.ceil(totalPages / perPage),
+      },
+    };
   }
 
-
   async findOne(id: string) {
-
     const order = await this.order.findFirst({
       where: { id },
       include: {
@@ -131,36 +134,36 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
             price: true,
             quantity: true,
             productId: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (!order) {
       throw new RpcException({
         status: HttpStatus.NOT_FOUND,
-        message: `Order with id ${id} not found`
+        message: `Order with id ${id} not found`,
       });
     }
-    const productsIds = order.OrderItem.map(orderItem => orderItem.productId);
-    const products: any[] = await firstValueFrom(
-      this.productsClient.send({ cmd: 'validate_products' }, productsIds),
-    );
 
+    const productIds = order.OrderItem.map((orderItem) => orderItem.productId);
+    const products: any[] = await firstValueFrom(
+      this.client.send({ cmd: 'validate_products' }, productIds),
+    );
 
     return {
       ...order,
-      OrderItem: order.OrderItem.map(orderItem => ({
-        orderItem,
-        name: products.find(product => product.id == orderItem.productId).name,
-
-      }))
-    }
-
+      OrderItem: order.OrderItem.map((orderItem) => ({
+        ...orderItem,
+        name: products.find((product) => product.id === orderItem.productId)
+          .name,
+      })),
+    };
   }
 
   async changeStatus(changeOrderStatusDto: changeOrderStatusDto) {
     const { id, status } = changeOrderStatusDto;
+
     const order = await this.findOne(id);
     if (order.status === status) {
       return order;
@@ -168,12 +171,54 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
 
     return this.order.update({
       where: { id },
-      data: { status: status }
+      data: { status: status },
     });
   }
 
-}
-function firtsValueFrom(arg0: Observable<any>) {
-  throw new Error('Function not implemented.');
-}
+  async createPaymentSession(order: OrderWithProducts) {
 
+    const paymentSession = await firstValueFrom(
+      this.client.send('create.payment.session', {
+        orderId: order.id,
+        currency: 'usd',
+        items: order.OrderItem.map( item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        }) ),
+      }),
+    );
+
+    return paymentSession;
+  }
+
+
+
+  async paidOrder( paidOrderDto: PaidOrderDto ) {
+
+    this.logger.log('Order Paid');
+    this.logger.log(paidOrderDto);
+
+    const order = await this.order.update({
+      where: { id: paidOrderDto.orderId },
+      data: {
+        status: 'PAID',
+        paid: true,
+        paidAt: new Date(),
+        stripeChargeId: paidOrderDto.stripePaymentId,
+        updatedAt: new Date(),
+        OrderReceipt:{
+          update:{
+            updatedAt: new Date()
+          }
+        }     
+      }
+    });
+
+    
+
+    return order;
+
+  }
+
+}
