@@ -16,7 +16,7 @@ import { OrderWithProducts } from './interfaces/order-with-products.interfaces';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
-  private readonly logger = new Logger('OrdersService');
+  private readonly logger = new Logger(OrdersService.name);
 
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {
     super();
@@ -50,8 +50,6 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       //3. Crear una transacción de base de datos
       const order = await this.order.create({
         data: {
-          stripeChargeId: "c001",
-          paidAt: new Date(),
           totalAmount: totalAmount,
           totalItems: totalItems,
           OrderItem: {
@@ -65,12 +63,6 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
               })),
             },
           },
-          OrderReceipt:{
-            create:{
-              receiptUrl: "TEST",
-              createdAt: new Date(),              
-            }
-          }
         },
         include: {
           OrderItem: {
@@ -168,7 +160,6 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     if (order.status === status) {
       return order;
     }
-
     return this.order.update({
       where: { id },
       data: { status: status },
@@ -188,37 +179,61 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         }) ),
       }),
     );
-
     return paymentSession;
   }
+  
 
+async paidOrder(paidOrderDto: PaidOrderDto) {
+  this.logger.log('payment.succeeded recibido', paidOrderDto);
 
+  const { orderId, stripePaymentId, receiptUrl } = paidOrderDto;
 
-  async paidOrder( paidOrderDto: PaidOrderDto ) {
+  if (!orderId) throw new Error('paidOrderDto.orderId is required');
+  if (!receiptUrl) this.logger.warn(`Receipt URL vacío para orderId=${orderId}`);
 
-    this.logger.log('Order Paid');
-    this.logger.log(paidOrderDto);
-
+  try {
     const order = await this.order.update({
-      where: { id: paidOrderDto.orderId },
+      where: { id: orderId },
       data: {
         status: 'PAID',
         paid: true,
         paidAt: new Date(),
-        stripeChargeId: paidOrderDto.stripePaymentId,
-        updatedAt: new Date(),
-        OrderReceipt:{
-          update:{
-            updatedAt: new Date()
-          }
-        }     
-      }
+        stripeChargeId: stripePaymentId,
+
+        // 👇 Usa el nombre EXACTO del campo de relación en tu schema: "OrderReceipt"
+        OrderReceipt: {
+          // evita error por duplicado cuando Stripe reintenta
+          connectOrCreate: {
+            where: { orderId },            // orderId es único en OrderReceipt
+            create: { receiptUrl },        // respeta NOT NULL de tu modelo
+          },
+        },
+      },
+      include: { OrderReceipt: true }, // útil para debug/ver que sí se creó
     });
 
-    
-
+    this.logger.log(`Orden ${orderId} marcada como PAID y recibo asociado`);
     return order;
 
+  } catch (e: any) {
+    // Prisma P2002 = unique constraint violation (idempotencia)
+    if (e.code === 'P2002') {
+      this.logger.warn(`OrderReceipt ya existía para orderId=${orderId}, continuando`);
+      // Aun así actualiza estado por si faltaba
+      return this.order.update({
+        where: { id: orderId },
+        data: {
+          status: 'PAID',
+          paid: true,
+          paidAt: new Date(),
+          stripeChargeId: stripePaymentId,
+        },
+        include: { OrderReceipt: true },
+      });
+    }
+    this.logger.error(`Error al marcar pago de orden ${orderId}: ${e.message}`);
+    throw e;
   }
+}
 
 }

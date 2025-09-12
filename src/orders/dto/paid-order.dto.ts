@@ -13,6 +13,7 @@ export class PaidOrderDto {
   @IsString()
   @IsUrl()
   receiptUrl: string;
+  
 
 
 }
